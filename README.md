@@ -1,15 +1,15 @@
 # Lipschitz Estimation
 
-Repository for the paper [Lipschitz Regularity of deep neural networks:
-analysis and efficient estimation](https://arxiv.org/abs/1805.10965)
+Repository for the *Theretical fundamentals of Deep Learning* project in 3rd year at CentraleSupélec.
+The code for SeqLip is from https://github.com/avirmaux/lipEstimation/tree/master
 
-Basic Python dependencies needed: PyTorch >= 0.3
-
+we kept only the utils components of the original code, and adapted the rest for our use cases : the sudy of PINNs
 
 ### Code organisation
 
+*`lip_comparisons.ipynb` : the main code for comparing the results on our different use cases
 * `lipschitz_approximations.py`: many estimators
 * `lipschitz_utils.py`: toolbox for the different estimators
 * `seqlip.py`: SeqLip and GreedySeqLip
-* `training.py`: general scheme for train/test
 * `utils.py`: utility functions
+

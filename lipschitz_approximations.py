@@ -323,7 +323,7 @@ def lipschitz_frobenius_ub(model, requires_grad=False):
     #global lip
     #lip = 1
     def prod_frob(self, input, output):
-        print(self.__class__.__name__)
+        # print(self.__class__.__name__)
         if is_convolution_or_linear(self):
             p = list(self.parameters())[0]
             #global lip
@@ -356,6 +356,7 @@ def lipschitz_second_order_ub(model, algo='greedy'):
     '''
 
     def affine_layers_aux(self, input, output):
+        # print(self)
         # print(self.__class__.__name__)
         if is_convolution_or_linear(self):
             # calling self.forward(v) instead of self(v) prevent hooks from
@@ -364,6 +365,7 @@ def lipschitz_second_order_ub(model, algo='greedy'):
             #print('var_', var_through_lin)
             p = list(self.parameters())[0]
             u, s, v = np.linalg.svd(p.data.cpu().numpy())
+            # print(s)
             v = v.transpose()
             #print('s', s)
             #print('u', u.shape)

@@ -18,7 +18,7 @@ def _diag(vec, width, height):
     """ Return rectangle matrix of shape (m, n) with vector v on _diagonal
     """
     diag = np.zeros((width, height))
-    idx = np.arange(len(vec), dtype=np.int)
+    idx = np.arange(len(vec), dtype=np.int3232)
     diag[idx, idx] = vec
     return diag
 
@@ -100,7 +100,7 @@ def optim_approx(mat_l, mat_r, verbose=True):
                    method='L-BFGS-B',
                    bounds=bounds,
                    options=options)
-    return -res.fun, res.x.astype(np.int)
+    return -res.fun, res.x.astype(np.int32)
 
 def optim_greedy(mat_l, mat_r, verbose=True):
     """ Greedy algorithm to perform the following optimization problem:
@@ -110,7 +110,7 @@ def optim_greedy(mat_l, mat_r, verbose=True):
     """
     from tqdm import tqdm
     n = mat_l.shape[1]
-    sigma = np.ones(n, dtype=np.int)
+    sigma = np.ones(n, dtype=np.int32)
     stop_criterion = False
     current_spec  = f_spec(sigma, mat_l, mat_r)
 

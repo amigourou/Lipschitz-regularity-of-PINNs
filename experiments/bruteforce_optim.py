@@ -18,7 +18,7 @@ def _diag(vec, width, height):
     """ Return rectangle matrix of shape (m, n) with vector v on _diagonal
     """
     diag = np.zeros((width, height))
-    idx = np.arange(len(vec), dtype=np.int)
+    idx = np.arange(len(vec), dtype=np.int32)
     diag[idx, idx] = vec
     return diag
 
@@ -100,7 +100,7 @@ def optim_approx(mat_l, mat_r, verbose=True):
                    method='L-BFGS-B',
                    bounds=bounds,
                    options=options)
-    return -res.fun, res.x.astype(np.int)
+    return -res.fun, res.x.astype(np.int32)
 
 def optim_greedy(mat_l, mat_r, verbose=True):
     """ Greedy algorithm to perform the following optimization problem:
@@ -110,7 +110,7 @@ def optim_greedy(mat_l, mat_r, verbose=True):
     """
     from tqdm import tqdm
     n = mat_l.shape[1]
-    sigma = np.ones(n, dtype=np.int)
+    sigma = np.ones(n, dtype=np.int32)
     stop_criterion = False
     current_spec  = f_spec(sigma, mat_l, mat_r)
 
@@ -143,6 +143,84 @@ def optim_greedy(mat_l, mat_r, verbose=True):
                     highest_loop,
                     previous))
     return current_spec, sigma
+
+
+import numpy as np
+from tqdm import tqdm
+
+def optim_nn_greedy_tanh(f_l, f_r, input_size, use_cuda=False, max_iter=200, verbose=True):
+    """
+    Greedy algorithm to optimize the spectral norm for tanh activation.
+
+    INPUT:
+        * `f_l`: Linear operator (left side).
+        * `f_r`: Linear operator (right side).
+        * `input_size`: Size of the input.
+        * `use_cuda`: Whether to use GPU acceleration.
+        * `max_iter`: Maximum number of iterations.
+        * `verbose`: Whether to print detailed progress.
+    """
+    import torch
+    from max_eigenvalue import generic_power_method
+    from tqdm import tqdm
+
+    x = torch.randn(input_size)
+    if use_cuda:
+        x = x.cuda()
+
+    # Initialize sigma to 1 (representing max derivative of tanh at 0 input)
+    sigma = torch.ones(f_r(x).size())
+    if use_cuda:
+        sigma = sigma.cuda()
+    sigma_flat = sigma.view(-1)
+
+    def spectral_norm(sigma, f_l, f_r):
+        """Compute spectral norm with specified `sigma`."""
+        s, _, _ = generic_power_method(
+            lambda x: f_l(f_r(x) * sigma),
+            input_size=input_size,
+            max_iter=max_iter,
+            use_cuda=use_cuda
+        )
+        return s.item()
+
+    current_spec = spectral_norm(sigma, f_l, f_r)
+    highest_loop = current_spec
+
+    it = 0
+    while it < max_iter:
+        it += 1
+        previous = highest_loop
+        highest_idx = -1
+
+        for i in tqdm(range(sigma_flat.size(0))):
+            # Modify sigma[i] to explore neighboring values within the range [0, 1]
+            old_value = sigma_flat[i].item()
+            new_value = 1 - old_value  # Toggle between lower and upper bound of range
+            sigma_flat[i] = new_value
+            spec = spectral_norm(sigma, f_l, f_r)
+
+            if highest_loop < spec:
+                highest_loop = spec
+                highest_idx = i
+                current_spec = spec
+
+            sigma_flat[i] = old_value  # Revert if no improvement
+
+        if highest_idx == -1:
+            break  # No further improvement, stop early
+
+        # Update sigma to the best configuration found in this iteration
+        sigma_flat[highest_idx] = 1 - sigma_flat[highest_idx]
+
+        if verbose:
+            print(
+                f"[{it}] Best update at index {highest_idx}: {highest_loop:.4f} > {previous:.4f}"
+            )
+
+    return current_spec, sigma
+
+
 
 
 def optim_nn_greedy(f_l, f_r, input_size, use_cuda=False, max_iter=200, verbose=True):

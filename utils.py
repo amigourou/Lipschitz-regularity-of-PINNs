@@ -1,5 +1,4 @@
 import numpy as np
-import ot
 
 from torch.autograd import Variable
 
@@ -10,7 +9,7 @@ import torchvision.utils as vutils
 use_cuda = torch.cuda.is_available()
 
 def save_model(model, tag=''):
-    torch.save(model.state_dict(), '{}.pth.tar'.format(where, tag))
+    torch.save(model.state_dict(), '{}.pth.tar'.format(tag))
 
 
 def load_model(model, where):
