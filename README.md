@@ -5,6 +5,8 @@ The code for SeqLip is from https://github.com/avirmaux/lipEstimation/tree/maste
 
 We kept only the utils components of the original code, and adapted the rest for our use cases : the sudy of PINNs
 
+The code used to train the PINNs (Spring system and Gravitational Field) is from https://github.com/amigourou/PINNS
+
 ### Code organisation
 
 * `lip_comparisons.ipynb` : the main code for comparing the results on our different use cases
